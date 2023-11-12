@@ -1,12 +1,13 @@
 import os.path
-from make_reccomendations import search_songs
-from save_liked_songs import save_liked_songs
-from find_artist_genres import find_artist_genres
+
+from src.save_liked_songs import save_liked_songs
+from src.find_artist_genres import find_artist_genres
+from src.make_recommendations import search_songs
 
 # check if liked_songs.tsv exists
 if not os.path.isfile("data/liked_songs.tsv"):
-    save_liked_songs()
-    find_artist_genres()
+    token = save_liked_songs()
+    find_artist_genres(token)
 
 else:
     query = input("Describe the music you're looking for: ")

@@ -1,6 +1,7 @@
 import requests
 import base64
 import webbrowser
+import concurrent.futures
 from urllib.parse import urlencode
 import os
 from dotenv import load_dotenv
@@ -54,11 +55,8 @@ def save_liked_songs():
         "Content-Type": "application/json",
     }
 
-    # Step 4: Get all 2000 liked songs (50 at a time) and save to csv
-    fin = open("data/liked_songs.tsv", "w")
-    fin.write("Song Title\tMain Artist\tMain Artist ID\tAlbum Name\tRelease Date\n")
-
-    for i in range(0, 1921, 50):
+    # Function to fetch a batch of songs
+    def fetch_songs(i):
         print(f"Fetching songs {i}-{i+50}...")
         user_params = {"limit": 50, "offset": i}
         user_tracks_response = requests.get(
@@ -68,6 +66,7 @@ def save_liked_songs():
         )
 
         liked_songs = user_tracks_response.json()["items"]
+        song_data = []
         for song in liked_songs:
             track = song["track"]
             main_artist_name = track["artists"][0]["name"]
@@ -75,6 +74,20 @@ def save_liked_songs():
             song_title = track["name"]
             album_name = track["album"]["name"]
             release_date = track["album"]["release_date"]
-            fin.write(
+            song_data.append(
                 f"{song_title}\t{main_artist_name}\t{main_artist_id}\t{album_name}\t{release_date}\n"
             )
+        return song_data
+
+    # Step 4: Get all liked songs (50 at a time) and save to csv
+    with open("data/liked_songs.tsv", "w") as f:
+        f.write("Song Title\tMain Artist\tMain Artist ID\tAlbum Name\tRelease Date\n")
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = executor.map(fetch_songs, range(0, 5000, 50))
+            for result in results:
+                f.writelines(result)
+
+    return token
+
+
+save_liked_songs()
