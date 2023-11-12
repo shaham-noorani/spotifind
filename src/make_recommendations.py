@@ -44,7 +44,7 @@ def search_song_batch(song_batch, query, artist_genres):
             },
             {
                 "role": "user",
-                "content": "I would like for you to tell me if each song strongly matches this query and error on the side of 'no':"
+                "content": "I would like for you to tell me if each song strongly matches this query and err on the side of 'no':"
                 + query,
             },
             {
